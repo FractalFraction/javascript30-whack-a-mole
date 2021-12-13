@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Whack A Mole!</title>
   <link href='https://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <h1>Whack-a-mole! <span class="score">0</span></h1>
@@ -32,11 +34,109 @@
     </div>
   </div>
 
-<script>
-  const holes = document.querySelectorAll('.hole');
-  const scoreBoard = document.querySelector('.score');
-  const moles = document.querySelectorAll('.mole');
+  <script>
+    const holes = document.querySelectorAll('.hole');
+    const scoreBoard = document.querySelector('.score');
+    const moles = document.querySelectorAll('.mole');
 
-</script>
+    let score = 0;
+    let gameActive = false;
+    let gameTimeInSecs = 10;
+
+    function randTime(min = 0, max = 1) {
+      // Time in milliseconds that the moles are active
+      return Math.round(Math.random() * (max - min) + min);
+    }
+
+    function randHole() {
+      return Math.round(Math.random() * holes.length)
+    }
+
+    // Function to show mole 
+    // Append "up" class to the classList of the containing hole div to display the mole
+    // Set a timeout with a time given by minimum of randTime or (gameTime - currentTime) 
+    // After the timeout has been reached remove "up" from the class list of that hole
+
+    function incrementScore() {
+      console.log("Increment Score!")
+      // Increment the score
+      score += 1;
+      scoreBoard.textContent = `${score}`
+    }
+
+    function toggleMole(){
+      this.classList.contains('up') ? this.classList.remove('up') : this.classList.add('up');
+    }
+
+    function clickedMole(){
+      console.log("Got a mole!")
+      incrementScore();
+      // Remove the mole from view
+      this.classList.remove('up')
+      // If user clicks the mole clear the set timeout 
+
+      // As user has clicked the mole, the associated event listener on the target hole should be removed. 
+
+    }
+
+    function displayMole() {
+      const holeNumber = randHole();
+      const targetHole = holes[holeNumber];
+
+      // Don't add an event listener to a hole with a displayed mole.
+      if (targetHole.classList.contains('up') === false) {
+        // Add an event listener to allow the user to click the mole
+        targetHole.addEventListener('click', clickedMole)
+
+        // Set a timeout to remove the event listener
+        const upTime = randTime(500, 1500);
+        setTimeout(function(){
+            targetHole.removeEventListener('click', clickedMole); 
+            // Stop displaying the mole
+            toggleMole.call(targetHole)
+          }, upTime);
+
+        // Show the mole 
+        console.log(targetHole);
+        toggleMole.call(targetHole);
+      }
+
+    }
+
+    function endGame(currentTimeId, molesToggleTimerId) {
+      gameActive = false;
+      // Clear all intervals functions
+      clearInterval(currentTimeId);
+      clearInterval(molesToggleTimerId);
+
+      // Reset the holes so no moles are displayed
+      holes.forEach((hole, index) => {
+        hole.classList.value = `hole hole${index + 1}`;
+      })
+    }
+
+    // When user hits start button, set the gameActive flag to true
+    function startGame() {
+      // Check if game is not already active
+      if (!gameActive) {
+        let gameActive = true;
+        const gameTime = gameTimeInSecs * 1000; // gameTime in milliseconds
+        // Track the current time of the game
+        let currentTime = 0;
+        currentTimeId = setInterval(() => { currentTime += 1 }, 1)
+
+        // Call the toggleMole function every 3000 milliseconds
+        molesToggleTimerId = setInterval(displayMole, Math.min(800, gameTime - currentTime ))
+
+        // End the game 
+        setTimeout(function () {
+          return endGame(currentTimeId, molesToggleTimerId)
+        }, gameTime)
+
+      }
+    }
+
+  </script>
 </body>
+
 </html>
